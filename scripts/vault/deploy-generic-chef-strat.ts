@@ -8,34 +8,34 @@ import { verifyContracts } from "../../utils/verifyContracts";
 // const registerSubsidy = require("../../utils/registerSubsidy");
 
 const {
-  USDC: { address: USDC },
-  WMATIC: { address: WMATIC },
-  polyWISE: { address: polyWISE },
-} = addressBook.polygon.tokens;
-const { polywise, quickswap, beefyfinance } = addressBook.polygon.platforms;
+  CAKE: { address: CAKE },
+  WBNB: { address: WBNB },
+  BNB: { address: BNB },
+} = addressBook.bsc.tokens;
+const { elk, pancake, beefyfinance } = addressBook.bsc.platforms;
 
 const shouldVerifyOnEtherscan = false;
 
-const want = web3.utils.toChecksumAddress("0x2F9209Ef6fA6C002bf6fC99124336e24F88B62D0");
+const want = web3.utils.toChecksumAddress("0x0ed7e52944161450477ee417de9cd3a859b14fd0"); // Cake-BNB LP Pool
 
 const vaultParams = {
-  mooName: "Moo Polywise Quick USDC-WISE",
-  mooSymbol: "mooPolywiseQuickUSDC-WISE",
+  mooName: "Crypthesia Pool CAKE-BNB",
+  mooSymbol: "CRT CakeBNB",
   delay: 21600,
 };
 
 const strategyParams = {
   want,
-  poolId: 1,
-  chef: polywise.masterchef,
-  unirouter: quickswap.router,
-  strategist: "0x010dA5FF62B6e45f89FA7B2d8CEd5a8b5754eC1b", // some address
-  keeper: beefyfinance.keeper,
-  beefyFeeRecipient: beefyfinance.beefyFeeRecipient,
-  outputToNativeRoute: [polyWISE, WMATIC],
-  outputToLp0Route: [polyWISE, USDC],
-  outputToLp1Route: [polyWISE],
-  pendingRewardsFunctionName: "pendingWise", // used for rewardsAvailable(), use correct function name from masterchef
+  poolId: 251,
+  chef: pancake.masterchef,
+  unirouter: pancake.router,
+  strategist: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", // some address
+  keeper: "0x47e3D80f9AB3953b80a7882296D8aC2fd9147849",
+  beefyFeeRecipient: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+  outputToNativeRoute: [BNB, WBNB],
+  outputToLp0Route: [BNB, CAKE],
+  outputToLp1Route: [BNB],
+  pendingRewardsFunctionName: "pendingCake", // used for rewardsAvailable(), use correct function name from masterchef
 };
 
 const contractNames = {
@@ -53,23 +53,27 @@ async function main() {
     return;
   }
 
-  await hardhat.run("compile");
-
   const Vault = await ethers.getContractFactory(contractNames.vault);
   const Strategy = await ethers.getContractFactory(contractNames.strategy);
+  let [deployer] = await ethers.getSigners();
+  // let deployer = new ethers.Wallet("df57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e", 
+  // new ethers.providers.JsonRpcProvider(
+  //   "http://localhost:8545/"
+  // ));
 
-  const [deployer] = await ethers.getSigners();
-
+  console.log(strategyParams);
   console.log("Deploying:", vaultParams.mooName);
-
+  console.log("Deployer: ", deployer.address);
   const predictedAddresses = await predictAddresses({ creator: deployer.address });
-
+  console.log("PredictedAddress: ", predictedAddresses);
   const vaultConstructorArguments = [
     predictedAddresses.strategy,
     vaultParams.mooName,
     vaultParams.mooSymbol,
     vaultParams.delay,
   ];
+
+
   const vault = await Vault.deploy(...vaultConstructorArguments);
   await vault.deployed();
 

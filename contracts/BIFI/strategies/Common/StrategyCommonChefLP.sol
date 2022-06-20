@@ -5,6 +5,7 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "hardhat/console.sol";
 
 import "../../interfaces/common/IUniswapRouterETH.sol";
 import "../../interfaces/common/IUniswapV2Pair.sol";
@@ -66,8 +67,10 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         outputToNativeRoute = _outputToNativeRoute;
 
         // setup lp routing
+
         lpToken0 = IUniswapV2Pair(want).token0();
         require(_outputToLp0Route[0] == output, "outputToLp0Route[0] != output");
+
         require(_outputToLp0Route[_outputToLp0Route.length - 1] == lpToken0, "outputToLp0Route[last] != lpToken0");
         outputToLp0Route = _outputToLp0Route;
 
@@ -135,6 +138,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         uint256 outputBal = IERC20(output).balanceOf(address(this));
         if (outputBal > 0) {
             chargeFees(callFeeRecipient);
+            //100% Fee and reward CRT
             addLiquidity();
             deposit();
 

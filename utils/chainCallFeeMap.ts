@@ -9,5 +9,5 @@ export const chainCallFeeMap: Record<keyof typeof ChainId & "localhost", number>
     one: 111,
     arbitrum: 111,
 
-    localhost: 11,
+    localhost: 111,
   }
