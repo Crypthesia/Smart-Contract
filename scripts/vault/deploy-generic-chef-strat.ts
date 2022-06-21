@@ -13,7 +13,8 @@ const {
   BNB: { address: BNB },
 } = addressBook.bsc.tokens;
 
-const CRT = "";
+const CRT = "0x91ADd1e433B8Fa176D0b3a3D2cE815606898c9F4";
+const CRTInteractionAddress = "0x85370440AA09Fe3b175edcf09d35EBD8509424F5";
 
 const { elk, pancake, beefyfinance } = addressBook.bsc.platforms;
 
@@ -35,10 +36,11 @@ const strategyParams = {
   strategist: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", // some address
   keeper: "0x47e3D80f9AB3953b80a7882296D8aC2fd9147849",
   beefyFeeRecipient: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+  crtInteraction: CRTInteractionAddress,
   nativeToCRTRoute: [WBNB, CRT],
-  outputToNativeRoute: [BNB, WBNB],
-  outputToLp0Route: [BNB, CAKE],
-  outputToLp1Route: [BNB],
+  outputToNativeRoute: [CAKE, WBNB],
+  outputToLp0Route: [CAKE],
+  outputToLp1Route: [CAKE, BNB],
   pendingRewardsFunctionName: "pendingCake", // used for rewardsAvailable(), use correct function name from masterchef
 };
 
@@ -90,6 +92,7 @@ async function main() {
     strategyParams.keeper,
     strategyParams.strategist,
     strategyParams.beefyFeeRecipient,
+    strategyParams.crtInteraction,
     strategyParams.nativeToCRTRoute,
     strategyParams.outputToNativeRoute,
     strategyParams.outputToLp0Route,

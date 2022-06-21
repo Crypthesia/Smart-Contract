@@ -134,6 +134,7 @@ const getUnirouterData = address => {
 const wrapNative = async (amount, wNativeAddr) => {
   const wNative = await ethers.getContractAt("IWrappedNative", wNativeAddr);
   await wNative.deposit({ value: amount });
+
 };
 
 module.exports = {

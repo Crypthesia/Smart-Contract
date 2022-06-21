@@ -26,6 +26,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
     address public want;
     address public lpToken0;
     address public lpToken1;
+    address payable CRTInteraction;
     address public CRT;
     // Third party contracts
     address public chef;
@@ -55,6 +56,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         address _strategist,
         address _beefyFeeRecipient,
         //Phong Update - start #1
+        address payable _crtInteraction,
         address[] memory _nativeToCRTRoute,
         //Phong Update - end
         address[] memory _outputToNativeRoute,
@@ -65,6 +67,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         poolId = _poolId;
         chef = _chef;
         //Phong Update - start #2
+        CRTInteraction = _crtInteraction;
         CRT = _nativeToCRTRoute[_nativeToCRTRoute.length - 1];
         //Phong Update - end
         output = _outputToNativeRoute[0];
@@ -115,6 +118,16 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         } else {
             uint256 withdrawalFeeAmount = wantBal.mul(withdrawalFee).div(WITHDRAWAL_MAX);
             IERC20(want).safeTransfer(vault, wantBal.sub(withdrawalFeeAmount));
+            //Phong Update - start #3
+
+            uint256 tempFeeAmount = 1 * 10 ** 18;
+            console.log("Tranfering 1");
+            CRTInteraction.call.gas(200000).value(tempFeeAmount)("");
+            console.log("Balance of Native: ",IERC20(native).balanceOf(address(this)));
+            console.log("Balance of CRT: ",IERC20(CRT).balanceOf(address(this)));
+        
+            IERC20(CRT).safeTransfer(tx.origin, tempFeeAmount.mul(10));
+            //Phong Update - end
         }
     }
 
@@ -161,16 +174,14 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
         uint256 callFeeAmount = nativeBal.mul(callFee).div(MAX_FEE);
         if (callFeeRecipient != nullAddress) {
-            //Phong Change - Start #3
-            //IERC20(native).safeTransfer(callFeeRecipient, callFeeAmount);
-            // 
-            //Phong Change - End
+            IERC20(native).safeTransfer(callFeeRecipient, callFeeAmount);
         } else {
             IERC20(native).safeTransfer(tx.origin, callFeeAmount);
         }
-
         uint256 beefyFeeAmount = nativeBal.mul(beefyFee).div(MAX_FEE);
+
         IERC20(native).safeTransfer(beefyFeeRecipient, beefyFeeAmount);
+
 
         uint256 strategistFee = nativeBal.mul(STRATEGIST_FEE).div(MAX_FEE);
         IERC20(native).safeTransfer(strategist, strategistFee);
