@@ -26,7 +26,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
     address public want;
     address public lpToken0;
     address public lpToken1;
-
+    address public CRT;
     // Third party contracts
     address public chef;
     uint256 public poolId;
@@ -54,6 +54,9 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         address _keeper,
         address _strategist,
         address _beefyFeeRecipient,
+        //Phong Update - start #1
+        address[] memory _nativeToCRTRoute,
+        //Phong Update - end
         address[] memory _outputToNativeRoute,
         address[] memory _outputToLp0Route,
         address[] memory _outputToLp1Route
@@ -61,7 +64,9 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         want = _want;
         poolId = _poolId;
         chef = _chef;
-
+        //Phong Update - start #2
+        CRT = _nativeToCRTRoute[_nativeToCRTRoute.length - 1];
+        //Phong Update - end
         output = _outputToNativeRoute[0];
         native = _outputToNativeRoute[_outputToNativeRoute.length - 1];
         outputToNativeRoute = _outputToNativeRoute;
@@ -134,7 +139,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
     // compounds earnings and charges performance fee
     function _harvest(address callFeeRecipient) internal whenNotPaused {
-        IMasterChef(chef).deposit(poolId, 0);
+        IMasterChef(chef).deposit(poolId, 0); // update reward from Masterchef 
         uint256 outputBal = IERC20(output).balanceOf(address(this));
         if (outputBal > 0) {
             chargeFees(callFeeRecipient);
@@ -156,7 +161,10 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
         uint256 callFeeAmount = nativeBal.mul(callFee).div(MAX_FEE);
         if (callFeeRecipient != nullAddress) {
-            IERC20(native).safeTransfer(callFeeRecipient, callFeeAmount);
+            //Phong Change - Start #3
+            //IERC20(native).safeTransfer(callFeeRecipient, callFeeAmount);
+            // 
+            //Phong Change - End
         } else {
             IERC20(native).safeTransfer(tx.origin, callFeeAmount);
         }

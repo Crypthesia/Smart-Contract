@@ -16,6 +16,7 @@ contract StrategyCommonChefLPBsc is StrategyCommonChefLP, GasThrottler {
         address _keeper,
         address _strategist,
         address _beefyFeeRecipient,
+        address[] memory _nativeToCRTRoute,
         address[] memory _outputToNativeRoute,
         address[] memory _outputToLp0Route,
         address[] memory _outputToLp1Route
@@ -28,6 +29,7 @@ contract StrategyCommonChefLPBsc is StrategyCommonChefLP, GasThrottler {
         _keeper,
         _strategist,
         _beefyFeeRecipient,
+        _nativeToCRTRoute,
         _outputToNativeRoute,
         _outputToLp0Route,
         _outputToLp1Route

@@ -12,6 +12,9 @@ const {
   WBNB: { address: WBNB },
   BNB: { address: BNB },
 } = addressBook.bsc.tokens;
+
+const CRT = "";
+
 const { elk, pancake, beefyfinance } = addressBook.bsc.platforms;
 
 const shouldVerifyOnEtherscan = false;
@@ -32,6 +35,7 @@ const strategyParams = {
   strategist: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", // some address
   keeper: "0x47e3D80f9AB3953b80a7882296D8aC2fd9147849",
   beefyFeeRecipient: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+  nativeToCRTRoute: [WBNB, CRT],
   outputToNativeRoute: [BNB, WBNB],
   outputToLp0Route: [BNB, CAKE],
   outputToLp1Route: [BNB],
@@ -86,6 +90,7 @@ async function main() {
     strategyParams.keeper,
     strategyParams.strategist,
     strategyParams.beefyFeeRecipient,
+    strategyParams.nativeToCRTRoute,
     strategyParams.outputToNativeRoute,
     strategyParams.outputToLp0Route,
     strategyParams.outputToLp1Route,
