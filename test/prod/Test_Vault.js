@@ -8,7 +8,7 @@ const { delay } = require("../../utils/timeHelpers");
 
 const TIMEOUT = 10 * 60 * 100000;
 
-const chainName = "bsc";
+const chainName = "polygon";
 const chainData = addressBook[chainName];
 const { beefyfinance } = chainData.platforms;
 
@@ -17,14 +17,15 @@ async function mineNBlocks(n) {
     await ethers.provider.send('evm_mine');
   }
 }
-const CRT = "0x91ADd1e433B8Fa176D0b3a3D2cE815606898c9F4";
-const CRTInteractionAddress = "0x85370440AA09Fe3b175edcf09d35EBD8509424F5";
+
 
 const config = {
-  vault: "0xf816bba8Db25f0E61C530D77974F68A9Fa5A7A7a",
+  CRT : "0xf694d6e19eCF16daD3441B8ae9Bb41038165c483",
+  CRTInteractionAddress : "0x8Cd07e40C2801037dcaDA66CCe182F13CC3724c0",
+  vault: "0x3eD512F1B37B7606C7A741b6FA4fa48C733728D0",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
-  testAmount: ethers.utils.parseEther("5"),
+  testAmount: ethers.utils.parseEther("500"),
   wnative: chainData.tokens.WNATIVE.address,
   keeper: "0x47e3D80f9AB3953b80a7882296D8aC2fd9147849",
   strategyOwner: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
@@ -46,9 +47,9 @@ describe("VaultLifecycleTest", () => {
     unirouter = await ethers.getContractAt(unirouterData.interface, unirouterAddr);
     want = await getVaultWant(vault, config.wnative);
     
-    CRTtoken = await ethers.getContractAt("Crypthesia", CRT);
+    CRTtoken = await ethers.getContractAt("Crypthesia", config.CRT);
     Native = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", config.wnative);
-    outputToken = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", chainData.tokens.CAKE.address);
+    outputToken = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", chainData.tokens.USDC.address);
     await zapNativeToToken({
       amount: config.testAmount,
       want,
@@ -83,7 +84,7 @@ describe("VaultLifecycleTest", () => {
 
     //mint ethers for CRT interaction
     await ethers.provider.send("hardhat_setBalance", [
-      CRTInteractionAddress,
+      config.CRTInteractionAddress,
       "0x1000000000000000000",
     ]);
 
@@ -148,7 +149,7 @@ describe("VaultLifecycleTest", () => {
     const pricePerShare = await vault.getPricePerFullShare();
       
     const beforeBalance = await CRTtoken.balanceOf(other.address) / 10**18;
-    const beforeInteractionBal = await CRTtoken.balanceOf(CRTInteractionAddress)/ 10**18;
+    const beforeInteractionBal = await CRTtoken.balanceOf(config.CRTInteractionAddress)/ 10**18;
 
     // await mineNBlocks(700);
     // console.log(strategy);
@@ -163,18 +164,20 @@ describe("VaultLifecycleTest", () => {
     //expect(callRewardBeforeHarvest).to.be.gt(0);
     await strategy.harvest({ gasPrice: 5000000 });
     console.log("Harvesting...");
-    const afterBalance = await CRTtoken.balanceOf(other.address)/ 10**18;
-    const afterInteractionBal = await CRTtoken.balanceOf(CRTInteractionAddress)/ 10**18;
 
     const vaultBalAfterHarvest = await vault.balance();
     const pricePerShareAfterHarvest = await vault.getPricePerFullShare();
     const callRewardAfterHarvest = await strategy.callReward();
-    console.log("Call Reward: ", callRewardAfterHarvest);
+    console.log("Call Reward: ", callRewardAfterHarvest.toString());
+    console.log("[Want] Vault Balance After Harvest", (vaultBalAfterHarvest/(10**18).toString()));
+
     await vault.connect(other).withdrawAll();
     console.log("Withdraw All...");
+    const afterBalance = await CRTtoken.balanceOf(other.address)/ 10**18;
+    const afterInteractionBal = await CRTtoken.balanceOf(config.CRTInteractionAddress)/ 10**18;
+
     const wantBalFinal = await want.balanceOf(other.address);
     console.log("\nAFTER:")
-    console.log("[Want] Vault Balance After", (vaultBalAfterHarvest/(10**18).toString()));
     console.log("[want] User balance final:", (wantBalFinal/(10**18)).toString());
 
     console.log("[CRT] User Balance After: ", afterBalance.toString());

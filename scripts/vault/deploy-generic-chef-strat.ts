@@ -11,7 +11,7 @@ const {
   CAKE: { address: CAKE },
   WBNB: { address: WBNB },
   BNB: { address: BNB },
-} = addressBook.bsc.tokens;
+} = addressBook.polygon.tokens;
 
 const CRT = "0x91ADd1e433B8Fa176D0b3a3D2cE815606898c9F4";
 const CRTInteractionAddress = "0x85370440AA09Fe3b175edcf09d35EBD8509424F5";
