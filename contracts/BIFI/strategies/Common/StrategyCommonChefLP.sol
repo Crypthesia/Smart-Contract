@@ -118,16 +118,6 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         } else {
             uint256 withdrawalFeeAmount = wantBal.mul(withdrawalFee).div(WITHDRAWAL_MAX);
             IERC20(want).safeTransfer(vault, wantBal.sub(withdrawalFeeAmount));
-            //Phong Update - start #3
-
-            uint256 tempFeeAmount = 1 * 10 ** 18;
-            console.log("Tranfering 1");
-            CRTInteraction.call.gas(200000).value(tempFeeAmount)("");
-            console.log("Balance of Native: ",IERC20(native).balanceOf(address(this)));
-            console.log("Balance of CRT: ",IERC20(CRT).balanceOf(address(this)));
-        
-            IERC20(CRT).safeTransfer(tx.origin, tempFeeAmount.mul(10));
-            //Phong Update - end
         }
     }
 
@@ -178,13 +168,16 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         } else {
             IERC20(native).safeTransfer(tx.origin, callFeeAmount);
         }
-        uint256 beefyFeeAmount = nativeBal.mul(beefyFee).div(MAX_FEE);
+        //Phong Change #1- Begin
+        // uint256 beefyFeeAmount = nativeBal.mul(beefyFee).div(MAX_FEE);
 
-        IERC20(native).safeTransfer(beefyFeeRecipient, beefyFeeAmount);
+        // IERC20(native).safeTransfer(beefyFeeRecipient, beefyFeeAmount);
 
 
-        uint256 strategistFee = nativeBal.mul(STRATEGIST_FEE).div(MAX_FEE);
-        IERC20(native).safeTransfer(strategist, strategistFee);
+        // uint256 strategistFee = nativeBal.mul(STRATEGIST_FEE).div(MAX_FEE);
+        // IERC20(native).safeTransfer(strategist, strategistFee);
+        uint256 crtFeeAmount = nativeBal.mul(beefyFee+STRATEGIST_FEE).div(MAX_FEE);
+        //Phong change end
     }
 
     // Adds liquidity to AMM and gets more LP tokens.

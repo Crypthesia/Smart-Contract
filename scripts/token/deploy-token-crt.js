@@ -1,34 +1,41 @@
-const { ethers } = require('hardhat');
+const { config } = require('dotenv');
+const { deployContract } = require('ethereum-waffle');
+const {ether, ethers} = require('hardhat');
+require("@nomiclabs/hardhat-ethers");
 
-require ('@nomiclabs/hardhat-ethers')
-
-const TokenConfig = {
-  name:"Crypthesia",
-  interaction: "CRTInteraction",
+tokenConfig = {
+    name: "Crypthesia",
+    abi: "",
+    address: "",
+    preminted: "1000000000",
 }
-async function main() {
-    const [deployer] = await ethers.getSigners();
-    console.log("Deploying contracts with the account:", deployer.address);
-    
-    const Token = await ethers.getContractFactory(TokenConfig.name);
-    const token = await Token.deploy();
-  
-    console.log("Token address:", token.address);
+let deployer;
 
-    const TokenInteraction = await ethers.getContractFactory(TokenConfig.interaction);
-    const tokenInteraction = await TokenInteraction.deploy(token.address);
+async function DeployCRT(){
+    [deployer] = await ethers.getSigners();
+    console.log(`Deploy with address: ${deployer.address}`);
+    crttoken = await ethers.getContractFactory(tokenConfig.name);
+    crtToken = await crttoken.deploy();
+    //update tokenConfig
+    tokenConfig.address = crtToken.address;
+    tokenConfig.abi = require('../../artifacts/contracts/BIFI/token/CRT.sol/Crypthesia.json').abi;
+    console.log(`CRT Address: ${crtToken.address}`);
+}
 
-    console.log("Token Interaction Address", tokenInteraction.address);
+async function preMint(address, amount){    
+    crtToken = await ethers.getContractAt(tokenConfig.abi,tokenConfig.address);
+    await crtToken.mint(address, ethers.utils.parseEther(amount));
+    console.log(`Pre mint for ${address} ${await crtToken.balanceOf(address)/ 1e18} CRT`);
+}
 
-    premint = "1000000";
-    await token.mint(tokenInteraction.address, ethers.utils.parseEther(premint));
+async function main(){
+    await DeployCRT();
+    await preMint(deployer.address, tokenConfig.preminted);
+}
 
-    console.log("Balance of Interaction: ", (await token.balanceOf(tokenInteraction.address)/10**18).toString());
-  }
-  
-  main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
+main()
+.then(() => process.exit(0))
+.catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
