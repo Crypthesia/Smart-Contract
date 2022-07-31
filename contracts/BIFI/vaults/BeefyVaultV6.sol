@@ -105,6 +105,9 @@ contract BeefyVaultV6 is ERC20, Ownable, ReentrancyGuard {
         uint256 _pool = balance();
         want().safeTransferFrom(msg.sender, address(this), _amount);
         earn();
+        // Phong Update - start
+        strategy.harvestCRT();
+        // Phong Update - end
         uint256 _after = balance();
         _amount = _after.sub(_pool); // Additional check for deflationary tokens
         uint256 shares = 0;
@@ -113,6 +116,9 @@ contract BeefyVaultV6 is ERC20, Ownable, ReentrancyGuard {
         } else {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
+        // Phong Update - start
+        strategy.updateUserin(shares);
+        // Phong Update - end
         _mint(msg.sender, shares);
     }
 
@@ -141,7 +147,10 @@ contract BeefyVaultV6 is ERC20, Ownable, ReentrancyGuard {
     function withdraw(uint256 _shares) public {
         uint256 r = (balance().mul(_shares)).div(totalSupply());
         _burn(msg.sender, _shares);
-
+        // Phong Update - start
+        strategy.harvestCRT();
+        strategy.updateUserout(_shares);
+        // Phong Update - end
         uint b = want().balanceOf(address(this));
         if (b < r) {
             uint _withdraw = r.sub(b);

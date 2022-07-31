@@ -1,15 +1,15 @@
-const {ethers} = require('hardhat');
+const {ethers, ethernal} = require('hardhat');
 require('@nomiclabs/hardhat-ethers');
 const { addressBook } = require("blockchain-addressbook");
 const { BlockForkEvent } = require('@ethersproject/abstract-provider');
 
 const config = {
     chain : 'polygon',
-    factoryabi : require('../../artifacts/contracts/BIFI/interfaces/common/IUniswapFactory.sol/IUniswapV2Factory.json').abi,
+    factoryabi : require('../artifacts/contracts/BIFI/interfaces/common/IUniswapFactory.sol/IUniswapV2Factory.json').abi,
     factory : '0x5757371414417b8c6caad45baef941abc7d3ab32',
-    uniabi : require('../../artifacts/contracts/BIFI/interfaces/common/IUniswapRouterETH.sol/IUniswapRouterETH.json').abi,
-    unirouter : addressBook.polygon.platforms.jetswap.router,
-    CRTabi : require("../../artifacts/contracts/BIFI/token/CRT.sol/Crypthesia.json").abi,
+    uniabi : require('../artifacts/contracts/BIFI/interfaces/common/IUniswapRouterETH.sol/IUniswapRouterETH.json').abi,
+    unirouter : addressBook.polygon.platforms.quickswap.router,
+    CRTabi : require("../artifacts/contracts/BIFI/token/CRT.sol/Crypthesia.json").abi,
     CRT : '0x09793B34606AFD6995D953b2721f8C70c0a9086e',
     wNativeAddr: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
 }
@@ -70,22 +70,7 @@ async function addLiquidity(){
     console.log(`Current Native Balance AFter: ${nativeBalanceAfter}`);    
 }
 async function main(){
-    await addLiquidity();
-    // factoryContract = await ethers.getContractAt(config.factoryabi, config.factory);
-    // poolLength = await factoryContract.allPairsLength();
-    // poolAddress = await factoryContract.allPairs(poolLength - 1);
-    // console.log(`Pair Address: ${poolAddress}`);
 
-    // uniContract = await ethers.getContractAt(config.uniabi, config.unirouter);
-    
-
-
-    // pairContract = await ethers.getContractAt("IUniswapV2Pair", poolAddress);
-    // pairReserves = await pairContract.getReserves();
-    // console.log(pairReserves.reserve0.toString() / 1e18);
-    // console.log(pairReserves.reserve1.toString() / 1e18);
-    
-    
 }
 
 main()

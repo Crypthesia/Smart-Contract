@@ -20,9 +20,9 @@ async function mineNBlocks(n) {
 
 
 const config = {
-  CRT : "0xf694d6e19eCF16daD3441B8ae9Bb41038165c483",
+  CRT : "0x09793b34606afd6995d953b2721f8c70c0a9086e",
   CRTInteractionAddress : "0x8Cd07e40C2801037dcaDA66CCe182F13CC3724c0",
-  vault: "0x3eD512F1B37B7606C7A741b6FA4fa48C733728D0",
+  vault: "0x799f888c96c590aaf9415dee3afc2900fe36ef91",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
   testAmount: ethers.utils.parseEther("500"),
@@ -49,44 +49,7 @@ describe("VaultLifecycleTest", () => {
     
     CRTtoken = await ethers.getContractAt("Crypthesia", config.CRT);
     Native = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", config.wnative);
-    outputToken = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", chainData.tokens.USDC.address);
-    await zapNativeToToken({
-      amount: config.testAmount,
-      want,
-      nativeTokenAddr: config.wnative,
-      unirouter,
-      swapSignature: unirouterData.swapSignature,
-      recipient: deployer.address,
-    });
-    //Mint Cake for Strategy
-    await swapNativeForToken({
-      unirouter,
-      amount: config.testAmount,
-      nativeTokenAddr: config.wnative,
-      token: outputToken,
-      recipient: deployer.address,
-      swapSignature: unirouterData.swapSignature,
-    })
-    //Mint Native for Strategy
-    await swapNativeForToken({
-      unirouter,
-      amount: config.testAmount,
-      nativeTokenAddr: config.wnative,
-      token: Native,
-      recipient: deployer.address,
-      swapSignature: unirouterData.swapSignature,
-    })
-    //mint ethers for strategy
-    await ethers.provider.send("hardhat_setBalance", [
-      strategy.address,
-      "0x1000000000000000000",
-    ]);
-
-    //mint ethers for CRT interaction
-    await ethers.provider.send("hardhat_setBalance", [
-      config.CRTInteractionAddress,
-      "0x1000000000000000000",
-    ]);
+    outputToken = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", chainData.tokens.polyWISE.address);
 
     const wantBal = await want.balanceOf(deployer.address);
     await outputToken.transfer(strategy.address, await outputToken.balanceOf(deployer.address));

@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "./tasks";
+require('hardhat-ethernal');
 
 import { HardhatUserConfig } from "hardhat/src/types/config";
 import { HardhatUserConfig as WithEtherscanConfig } from "hardhat/config";
@@ -14,6 +15,7 @@ const accounts = getPKs();
 const hardhatNetworkAccounts = buildHardhatNetworkAccounts(accounts);
 
 const config: DeploymentConfig = {
+  
   defaultNetwork: "localhost",
   networks: {
     hardhat: {

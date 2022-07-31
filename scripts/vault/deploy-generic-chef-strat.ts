@@ -13,7 +13,7 @@ const {
   BNB: { address: BNB },
 } = addressBook.polygon.tokens;
 
-const CRT = "0x91ADd1e433B8Fa176D0b3a3D2cE815606898c9F4";
+const CRT = "0x09793B34606AFD6995D953b2721f8C70c0a9086e";
 const CRTInteractionAddress = "0x85370440AA09Fe3b175edcf09d35EBD8509424F5";
 
 const { elk, pancake, beefyfinance } = addressBook.bsc.platforms;

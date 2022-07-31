@@ -14,14 +14,12 @@ const config = {
     wNativeAddr: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
 }
 
-const addlpConfig = {
-    tokenA: config.CRT,
-    tokenB: config.wNativeAddr,
-    amountADesired: ethers.utils.parseEther("1000000"), // 10000000 CRT 
-    amountBDesired: ethers.utils.parseEther("1000"), // 1000 Native 
-    amountAMin: ethers.utils.parseEther("1"),
-    amountBMin: ethers.utils.parseEther("1"),
-    to: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+const swapconfig = {
+    amountIn: ethers.utils.parseEther("0.01"),
+    amountOutMin: 0,
+    path0: ['0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270','0x09793B34606AFD6995D953b2721f8C70c0a9086e'],
+    path1: ['0x09793B34606AFD6995D953b2721f8C70c0a9086e','0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'],
+    to: '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199',
     deadline: 5000000000,
 }
 
@@ -31,11 +29,9 @@ async function wrapNative(amount, wNativeAddr){
     await wNative.deposit({ value: amount });
   };
 
-async function addLiquidity(){
+async function swap(){
     [deployer, keeper, other] = await ethers.getSigners();
     console.log("Deployer(first provider) address: ",deployer.address);
-    //ether -> wrap native
-    await wrapNative(addlpConfig.amountBDesired, config.wNativeAddr);
     //set up contract
     factoryContract = await ethers.getContractAt(config.factoryabi, config.factory);
     uniContract = await ethers.getContractAt(config.uniabi, config.unirouter);
@@ -50,17 +46,14 @@ async function addLiquidity(){
     await crtContract.approve(config.unirouter, crtBalance);
     await nativeContract.approve(config.unirouter, nativeBalance);
 
-    const addlpArguments = [
-        addlpConfig.tokenA,
-        addlpConfig.tokenB,
-        addlpConfig.amountADesired,
-        addlpConfig.amountBDesired,
-        addlpConfig.amountAMin,
-        addlpConfig.amountBMin,
-        addlpConfig.to,
-        addlpConfig.deadline
+    const swapArguments = [
+        swapconfig.amountIn,
+        swapconfig.amountOutMin,
+        swapconfig.path0,
+        swapconfig.to,
+        swapconfig.deadline,
     ]
-    let tx = await uniContract.addLiquidity(...addlpArguments);
+    let tx = await uniContract.swapExactTokensForTokens(...swapArguments);
     console.log(tx.hash);
     await tx.wait();
     crtBalanceAfter = await crtContract.balanceOf(deployer.address);
@@ -70,7 +63,7 @@ async function addLiquidity(){
     console.log(`Current Native Balance AFter: ${nativeBalanceAfter}`);    
 }
 async function main(){
-    await addLiquidity();
+    await swap();
     // factoryContract = await ethers.getContractAt(config.factoryabi, config.factory);
     // poolLength = await factoryContract.allPairsLength();
     // poolAddress = await factoryContract.allPairs(poolLength - 1);

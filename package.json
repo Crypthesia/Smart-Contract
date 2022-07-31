@@ -11,6 +11,7 @@
     "@uniswap/lib": "^4.0.1-alpha",
     "bignumber.js": "^9.0.1",
     "blockchain-addressbook": "^0.3.27",
+    "hardhat-ethernal": "^1.0.0",
     "keccak": "^3.0.1",
     "rlp": "^2.2.6",
     "ts-node": "^10.0.0",

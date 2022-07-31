@@ -19,6 +19,16 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
     using SafeMath for uint256;
 
     address constant nullAddress = address(0);
+    // Phong Update - start #4
+    // user info
+    struct UserInfo{
+        uint256 amount; // amount of LP Tokens of user
+        uint256 rewardDebt; // use for CRT Calculation
+    }
+    mapping (address => UserInfo) public userInfo;
+    uint256 public accCRTpershare;
+    uint256 public totalVaultShare;
+    // Phong Update - end #4
 
     // Tokens used
     address public native;
@@ -37,6 +47,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
     string public pendingRewardsFunctionName;
 
     // Routes
+    address[] public nativeToCRTRoute;
     address[] public outputToNativeRoute;
     address[] public outputToLp0Route;
     address[] public outputToLp1Route;
@@ -69,6 +80,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         //Phong Update - start #2
         CRTInteraction = _crtInteraction;
         CRT = _nativeToCRTRoute[_nativeToCRTRoute.length - 1];
+        nativeToCRTRoute = _nativeToCRTRoute;
         //Phong Update - end
         output = _outputToNativeRoute[0];
         native = _outputToNativeRoute[_outputToNativeRoute.length - 1];
@@ -89,7 +101,45 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
         _giveAllowances();
     }
+    
+    // Phong Update - start #5
+    function updateUserin(uint256 _amount) external{
+        require(msg.sender == vault, 'not vault!');
+        UserInfo storage user = userInfo[tx.origin];
+        if (_amount > 0){
+            user.amount = user.amount.add(_amount);
+            totalVaultShare = totalVaultShare.add(_amount);
+        }
+        console.log("amount:", _amount);
+        console.log("totalVaultShare:", totalVaultShare);
+        user.rewardDebt = user.amount.mul(accCRTpershare).div(1e12);
+    }
 
+    function updateUserout(uint256 _amount) external{
+        require(msg.sender == vault, 'not vault!');
+        UserInfo storage user = userInfo[tx.origin];
+        if (_amount > 0){
+            user.amount = user.amount.sub(_amount);
+            totalVaultShare = totalVaultShare.sub(_amount);
+        }
+        user.rewardDebt = user.amount.mul(accCRTpershare).div(1e12);
+    }
+    
+    function harvestCRT() external{
+        UserInfo storage user = userInfo[tx.origin];
+        uint256 pending = user.amount.mul(accCRTpershare).div(1e12).sub(user.rewardDebt);      
+        if (pending > 0){
+            IERC20(CRT).safeTransfer(tx.origin, pending);
+        }
+        user.rewardDebt = user.amount.mul(accCRTpershare).div(1e12);
+    }
+
+    function pendingCRT(address _user) external view returns (uint256){
+        UserInfo storage user = userInfo[_user];
+        return user.amount.mul(accCRTpershare).div(1e12).sub(user.rewardDebt);
+    }
+
+    // Phong Update - end 
     // puts the funds to work
     function deposit() public whenNotPaused {
         uint256 wantBal = IERC20(want).balanceOf(address(this));
@@ -163,6 +213,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
         uint256 nativeBal = IERC20(native).balanceOf(address(this));
 
         uint256 callFeeAmount = nativeBal.mul(callFee).div(MAX_FEE);
+        console.log("call Fee amount:", callFeeAmount);
         if (callFeeRecipient != nullAddress) {
             IERC20(native).safeTransfer(callFeeRecipient, callFeeAmount);
         } else {
@@ -176,7 +227,17 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
         // uint256 strategistFee = nativeBal.mul(STRATEGIST_FEE).div(MAX_FEE);
         // IERC20(native).safeTransfer(strategist, strategistFee);
-        uint256 crtFeeAmount = nativeBal.mul(beefyFee+STRATEGIST_FEE).div(MAX_FEE);
+        uint256 crtFeeAmount = nativeBal.mul(beefyFee.add(STRATEGIST_FEE)).div(MAX_FEE);
+        console.log("native balance:", IERC20(native).balanceOf(address(this)));
+        console.log("crtFeeAmount", crtFeeAmount);
+        uint256 crtBalbefore = IERC20(CRT).balanceOf(address(this));
+        IUniswapRouterETH(unirouter).swapExactTokensForTokens(crtFeeAmount, 0, nativeToCRTRoute, address(this), now);
+        uint256 crtBalafter = IERC20(CRT).balanceOf(address(this));
+        uint256 crtBalnew = crtBalafter.sub(crtBalbefore);
+        console.log("crtBalbefore:", crtBalbefore);
+        console.log("crtBalafter:", crtBalafter);
+        accCRTpershare = accCRTpershare.add(crtBalnew.mul(1e12).div(totalVaultShare));
+        console.log("accCRTPershare:",accCRTpershare);
         //Phong change end
     }
 
@@ -296,6 +357,10 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
         IERC20(lpToken1).safeApprove(unirouter, 0);
         IERC20(lpToken1).safeApprove(unirouter, uint256(-1));
+
+        //Phong update - begin
+        IERC20(native).safeApprove(unirouter, uint256(-1));
+        //Phong update - end
     }
 
     function _removeAllowances() internal {
