@@ -20,9 +20,9 @@ async function mineNBlocks(n) {
 
 
 const config = {
-  CRT : "0x09793b34606afd6995d953b2721f8c70c0a9086e",
+  CRT : "0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12",
   CRTInteractionAddress : "0x8Cd07e40C2801037dcaDA66CCe182F13CC3724c0",
-  vault: "0x799f888c96c590aaf9415dee3afc2900fe36ef91",
+  vault: "0x3ebdc890d8Fc00FfD2E22055A8d9114f33124FC4",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
   testAmount: ethers.utils.parseEther("500"),
@@ -33,7 +33,7 @@ const config = {
 };
 
 describe("VaultLifecycleTest", () => {
-  let vault, strategy, unirouter, want, CRTtoken, Native, outputToken, deployer, keeper, other;
+  let vault, strategy, unirouter, want, CRTToken, Native, outputToken, deployer, keeper, other;
 
   beforeEach(async () => {
     [deployer, keeper, other] = await ethers.getSigners();
@@ -45,39 +45,20 @@ describe("VaultLifecycleTest", () => {
     const unirouterAddr = await strategy.unirouter();
     const unirouterData = getUnirouterData(unirouterAddr);
     unirouter = await ethers.getContractAt(unirouterData.interface, unirouterAddr);
+    CRTToken = await ethers.getContractAt("Crypthesia", config.CRT);
     want = await getVaultWant(vault, config.wnative);
-    
-    CRTtoken = await ethers.getContractAt("Crypthesia", config.CRT);
-    Native = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", config.wnative);
-    outputToken = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", chainData.tokens.polyWISE.address);
-
+    console.log(`Want ${want.address}`);
+    await zapNativeToToken({
+      amount: config.testAmount,
+      want,
+      nativeTokenAddr: config.wnative,
+      unirouter,
+      swapSignature: unirouterData.swapSignature,
+      recipient: deployer.address,
+    });
     const wantBal = await want.balanceOf(deployer.address);
-    await outputToken.transfer(strategy.address, await outputToken.balanceOf(deployer.address));
-    await Native.transfer(strategy.address, await Native.balanceOf(deployer.address));
-
-    // console.log("Cake Token in Strategy:", (await outputToken.balanceOf(strategy.address) / 10**18).toString());
-    // console.log("Native Token in Strategy:", (await Native.balanceOf(strategy.address) / 10**18).toString());
-    
     await want.transfer(other.address, wantBal.div(2));
   });
-  // it("Check Vault Token Has Value", async () => {
-  //   await unpauseIfPaused(strategy, keeper);
-
-  //   const wantBalStart = await want.balanceOf(deployer.address);
-  //   console.log("want balance start:", (wantBalStart/(10**18)).toString());
-  //   //console.log("want :", await vault.want());
-  //   await want.approve(vault.address, wantBalStart);
-  //   await vault.depositAll();
-  //   //console.log("want balance 0:", ((await want.balanceOf(deployer.address))/10**18).toString());
-
-
-  //   const vaultTokenBal = await vault.balanceOf(deployer.address);
-  //   console.log("Vault Balance Token:", (vaultTokenBal/(10**18)).toString());
-
-  //   expect(vaultTokenBal).to.be.gt(0);
-  //   //await vault.withdrawAll();
-
-  // }).timeout(TIMEOUT);
 
   // it("User can deposit and withdraw from the vault.", async () => {
   //   await unpauseIfPaused(strategy, keeper);
@@ -85,10 +66,9 @@ describe("VaultLifecycleTest", () => {
   //   const wantBalStart = await want.balanceOf(deployer.address);
   //   console.log("want balance start:", (wantBalStart/(10**18)).toString());
   //   //console.log("want :", await vault.want());
-  //   await want.approve(vault.address, wantBalStart);
+  //   await want.approve(vault.address, wantBalStart + 1);
   //   await vault.depositAll();
-  //   //console.log("want balance 0:", ((await want.balanceOf(deployer.address))/10**18).toString());
-
+    
   //   await vault.withdrawAll();
 
   //   const wantBalFinal = await want.balanceOf(deployer.address);
@@ -111,10 +91,9 @@ describe("VaultLifecycleTest", () => {
     const vaultBal = await vault.balance();
     const pricePerShare = await vault.getPricePerFullShare();
       
-    const beforeBalance = await CRTtoken.balanceOf(other.address) / 10**18;
-    const beforeInteractionBal = await CRTtoken.balanceOf(config.CRTInteractionAddress)/ 10**18;
-
-    // await mineNBlocks(700);
+    const beforeBalance = await CRTToken.balanceOf(other.address) / 10**18;
+    
+    await mineNBlocks(40000);
     // console.log(strategy);
     const callRewardBeforeHarvest = await strategy.connect(other).callReward();
 
@@ -122,8 +101,7 @@ describe("VaultLifecycleTest", () => {
     console.log("[Want] Vault balance", (vaultBal/(10**18).toString()));
     console.log("Price per share:", (pricePerShare/(10**18)).toString());
     console.log("[CRT] User Balance Before: ", beforeBalance.toString());
-    console.log("[CRT] Vault Balance Before: ", beforeInteractionBal.toString());
-
+    console.log("Call Reward: Before", callRewardBeforeHarvest.toString());
     //expect(callRewardBeforeHarvest).to.be.gt(0);
     await strategy.harvest({ gasPrice: 5000000 });
     console.log("Harvesting...");
@@ -131,30 +109,28 @@ describe("VaultLifecycleTest", () => {
     const vaultBalAfterHarvest = await vault.balance();
     const pricePerShareAfterHarvest = await vault.getPricePerFullShare();
     const callRewardAfterHarvest = await strategy.callReward();
-    console.log("Call Reward: ", callRewardAfterHarvest.toString());
+    console.log("Call Reward After: ", callRewardAfterHarvest.toString());
     console.log("[Want] Vault Balance After Harvest", (vaultBalAfterHarvest/(10**18).toString()));
 
     await vault.connect(other).withdrawAll();
     console.log("Withdraw All...");
-    const afterBalance = await CRTtoken.balanceOf(other.address)/ 10**18;
-    const afterInteractionBal = await CRTtoken.balanceOf(config.CRTInteractionAddress)/ 10**18;
+    const afterBalance = await CRTToken.balanceOf(other.address)/ 10**18;
 
     const wantBalFinal = await want.balanceOf(other.address);
     console.log("\nAFTER:")
-    console.log("[want] User balance final:", (wantBalFinal/(10**18)).toString());
-
+    console.log("[want] User Balance After:", (wantBalFinal/(10**18)).toString());
+    console.log("Price per share after:", (pricePerShare/(10**18)).toString());
     console.log("[CRT] User Balance After: ", afterBalance.toString());
-    console.log("[CRT] Vault Balance After: ", afterInteractionBal.toString());
 
-    // expect(vaultBalAfterHarvest).to.be.gt(vaultBal);
-    // expect(pricePerShareAfterHarvest).to.be.gt(pricePerShare);
-    // expect(callRewardBeforeHarvest).to.be.gt(callRewardAfterHarvest);
+    expect(vaultBalAfterHarvest).to.be.gt(vaultBal);
+    expect(pricePerShareAfterHarvest).to.be.gt(pricePerShare);
+    expect(callRewardBeforeHarvest).to.be.gt(callRewardAfterHarvest);
     
-    // expect(wantBalFinal).to.be.gt(wantBalStart.mul(99).div(100));
+    expect(wantBalFinal).to.be.gt(wantBalStart.mul(99).div(100));
 
     const lastHarvest = await strategy.lastHarvest();
     console.log("Last Harvest:", (lastHarvest).toString());
-    // expect(lastHarvest).to.be.gt(0);
+    expect(lastHarvest).to.be.gt(0);
   }).timeout(TIMEOUT);
 
   // it("Manager can panic.", async () => {

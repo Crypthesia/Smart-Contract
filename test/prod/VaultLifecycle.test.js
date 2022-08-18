@@ -29,7 +29,7 @@ async function mineNBlocks(n) {
 }
 const config = {
   CRT: "0x09793b34606afd6995d953b2721f8c70c0a9086e",
-  vault: "0x64485dBb165C74b445ECFd873f843bB114304cFf",
+  vault: "0x93c9f29CF2496e73f3d8b07055e2359267207147",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
   testAmount: ethers.utils.parseEther("1000"),
@@ -71,54 +71,54 @@ describe("VaultLifecycleTest", () => {
     await want.transfer(other.address, wantBal.div(2));
   });
 
-  // it("User can deposit and withdraw from the vault.", async () => {
-  //   await unpauseIfPaused(strategy, keeper);
-  //   const wantBalStart = await want.balanceOf(deployer.address);
-
-  //   console.log(`want start:`,wantBalStart.toString());
-  //   await want.approve(vault.address, wantBalStart);
-  //   await vault.depositAll();
-  //   console.log("depositing:", (await want.balanceOf(deployer.address)).toString());
-  //   await vault.withdrawAll();
-
-  //   const wantBalFinal = await want.balanceOf(deployer.address);
-  //   console.log(`want final`, wantBalFinal.toString());
-
-  //   expect(wantBalFinal).to.be.lte(wantBalStart);
-  //   expect(wantBalFinal).to.be.gt(wantBalStart.mul(99).div(100));
-  // }).timeout(TIMEOUT);
-
-  it("Harvests work as expected.", async () => {
+  it("User can deposit and withdraw from the vault.", async () => {
     await unpauseIfPaused(strategy, keeper);
-
     const wantBalStart = await want.balanceOf(deployer.address);
+
+    console.log(`want start:`,wantBalStart.toString());
     await want.approve(vault.address, wantBalStart);
-    console.log("Pending CRT 0:", (await strategy.pendingCRT(deployer.address)).toString());
     await vault.depositAll();
-
-    const vaultBal = await vault.balance();
-    const pricePerShare = await vault.getPricePerFullShare();
-    await mineNBlocks(20);
-    const callRewardBeforeHarvest = await strategy.callReward();
-    expect(callRewardBeforeHarvest).to.be.gt(0);
-    await strategy.harvest({ gasPrice: 5000000 });
-    const vaultBalAfterHarvest = await vault.balance();
-    const pricePerShareAfterHarvest = await vault.getPricePerFullShare();
-    const callRewardAfterHarvest = await strategy.callReward();
-    console.log("Pending CRT 1:", (await strategy.pendingCRT(deployer.address)).toString());
+    console.log("depositing:", (await want.balanceOf(deployer.address)).toString());
     await vault.withdrawAll();
+
     const wantBalFinal = await want.balanceOf(deployer.address);
+    console.log(`want final`, wantBalFinal.toString());
 
-    expect(vaultBalAfterHarvest).to.be.gt(vaultBal);
-    expect(pricePerShareAfterHarvest).to.be.gt(pricePerShare);
-    expect(callRewardBeforeHarvest).to.be.gt(callRewardAfterHarvest);
-    
+    expect(wantBalFinal).to.be.lte(wantBalStart);
     expect(wantBalFinal).to.be.gt(wantBalStart.mul(99).div(100));
-
-    const lastHarvest = await strategy.lastHarvest();
-    expect(lastHarvest).to.be.gt(0);
-    console.log("CRT Token of Strategy", (await CRTToken.balanceOf(strategy.address)).toString());
   }).timeout(TIMEOUT);
+
+  // it("Harvests work as expected.", async () => {
+  //   await unpauseIfPaused(strategy, keeper);
+
+  //   const wantBalStart = await want.balanceOf(deployer.address);
+  //   await want.approve(vault.address, wantBalStart);
+  //   console.log("Pending CRT 0:", (await strategy.pendingCRT(deployer.address)).toString());
+  //   await vault.depositAll();
+
+  //   const vaultBal = await vault.balance();
+  //   const pricePerShare = await vault.getPricePerFullShare();
+  //   await mineNBlocks(20);
+  //   const callRewardBeforeHarvest = await strategy.callReward();
+  //   expect(callRewardBeforeHarvest).to.be.gt(0);
+  //   await strategy.harvest({ gasPrice: 5000000 });
+  //   const vaultBalAfterHarvest = await vault.balance();
+  //   const pricePerShareAfterHarvest = await vault.getPricePerFullShare();
+  //   const callRewardAfterHarvest = await strategy.callReward();
+  //   console.log("Pending CRT 1:", (await strategy.pendingCRT(deployer.address)).toString());
+  //   await vault.withdrawAll();
+  //   const wantBalFinal = await want.balanceOf(deployer.address);
+
+  //   expect(vaultBalAfterHarvest).to.be.gt(vaultBal);
+  //   expect(pricePerShareAfterHarvest).to.be.gt(pricePerShare);
+  //   expect(callRewardBeforeHarvest).to.be.gt(callRewardAfterHarvest);
+    
+  //   expect(wantBalFinal).to.be.gt(wantBalStart.mul(99).div(100));
+
+  //   const lastHarvest = await strategy.lastHarvest();
+  //   expect(lastHarvest).to.be.gt(0);
+  //   console.log("CRT Token of Strategy", (await CRTToken.balanceOf(strategy.address)).toString());
+  // }).timeout(TIMEOUT);
 
 //   it("Manager can panic.", async () => {
 //     await unpauseIfPaused(strategy, keeper);

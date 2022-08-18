@@ -2,6 +2,7 @@
 
 pragma solidity ^0.6.0;
 
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -101,12 +102,15 @@ contract BeefyVaultV6 is ERC20, Ownable, ReentrancyGuard {
      */
     function deposit(uint _amount) public nonReentrant {
         strategy.beforeDeposit();
-
+        console.log("BeforeDeposit success");
         uint256 _pool = balance();
         want().safeTransferFrom(msg.sender, address(this), _amount);
+        console.log("Transfer to vault success");
         earn();
         // Phong Update - start
         strategy.harvestCRT();
+        console.log("harvestCRT success");
+        
         // Phong Update - end
         uint256 _after = balance();
         _amount = _after.sub(_pool); // Additional check for deflationary tokens
@@ -118,8 +122,11 @@ contract BeefyVaultV6 is ERC20, Ownable, ReentrancyGuard {
         }
         // Phong Update - start
         strategy.updateUserin(shares);
+        console.log("Update Userin success");
+        
         // Phong Update - end
         _mint(msg.sender, shares);
+        console.log("mint success");
     }
 
     /**

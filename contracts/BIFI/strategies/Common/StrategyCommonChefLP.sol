@@ -244,7 +244,7 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
     // Adds liquidity to AMM and gets more LP tokens.
     function addLiquidity() internal {
         uint256 outputHalf = IERC20(output).balanceOf(address(this)).div(2);
-
+        console.log("Outputhaft:", outputHalf);
         if (lpToken0 != output) {
             IUniswapRouterETH(unirouter).swapExactTokensForTokens(outputHalf, 0, outputToLp0Route, address(this), now);
         }
@@ -255,6 +255,8 @@ contract StrategyCommonChefLP is StratManager, FeeManager {
 
         uint256 lp0Bal = IERC20(lpToken0).balanceOf(address(this));
         uint256 lp1Bal = IERC20(lpToken1).balanceOf(address(this));
+        console.log("[AddLP] LP0 Bal:",lp0Bal);
+        console.log("[AddLP] LP1 Bal:",lp1Bal);
         IUniswapRouterETH(unirouter).addLiquidity(lpToken0, lpToken1, lp0Bal, lp1Bal, 1, 1, address(this), now);
     }
 

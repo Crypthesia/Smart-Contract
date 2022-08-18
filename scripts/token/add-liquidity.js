@@ -10,7 +10,7 @@ const config = {
     uniabi : require('../../artifacts/contracts/BIFI/interfaces/common/IUniswapRouterETH.sol/IUniswapRouterETH.json').abi,
     unirouter : addressBook.polygon.platforms.jetswap.router,
     CRTabi : require("../../artifacts/contracts/BIFI/token/CRT.sol/Crypthesia.json").abi,
-    CRT : '0x09793B34606AFD6995D953b2721f8C70c0a9086e',
+    CRT : '0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12',
     wNativeAddr: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
 }
 

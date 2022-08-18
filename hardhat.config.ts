@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "./tasks";
-require('hardhat-ethernal');
+//require('hardhat-ethernal');
 
 import { HardhatUserConfig } from "hardhat/src/types/config";
 import { HardhatUserConfig as WithEtherscanConfig } from "hardhat/config";
@@ -19,6 +19,7 @@ const config: DeploymentConfig = {
   defaultNetwork: "localhost",
   networks: {
     hardhat: {
+      chainId: 31337,
       // accounts visible to hardhat network used by `hardhat node --fork` (yarn net <chainName>)
       accounts: hardhatNetworkAccounts,
     },
@@ -58,6 +59,7 @@ const config: DeploymentConfig = {
       accounts: accounts,
     },
     localhost: {
+      chainId: 31337,
       url: "http://127.0.0.1:8545",
       timeout: 300000,
       accounts: ["df57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e", "14ebe496061335e1d56f61d4dd00a4dc547fe3dfb6fdd18b304616167fa6ee8c", "307f4e0bd8919fb98098ea4bece5062510e125102ca6b3ef2cda70846d00c77c"],

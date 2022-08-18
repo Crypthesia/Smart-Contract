@@ -7,13 +7,13 @@ const { setPendingRewardsFunctionName } = require("../utils/setPendingRewardsFun
 const { verifyContracts } = require("../utils/verifyContracts");
 
 const {
-    ETH: { address: ETH },
+    USDC: { address: USDC },
     USDT: { address: USDT },
     pWINGS: {address: pWINGS },
     MATIC: {address: MATIC},
   } = addressBook.polygon.tokens;
 
-const want = web3.utils.toChecksumAddress("0xc7f1B47F4ed069E9B34e6bD59792B8ABf5a66339"); // WETH-USDT LP Pool
+const want = web3.utils.toChecksumAddress("0x20bf018fddba3b352f3d913fe1c81b846fe0f490"); // USDT-USDC Jetswap LP-pair
 
 
 const TokenConfig = {
@@ -35,18 +35,18 @@ async function main() {
     [deployer, kepper, other] = await ethers.getSigners();
     const shouldVerifyOnEtherscan = false;
     
-    const CRT = "0x09793B34606AFD6995D953b2721f8C70c0a9086e";
+    const CRT = "0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12";
     const CRTInteractionAddress = "0x85370440AA09Fe3b175edcf09d35EBD8509424F5";
     
     const vaultParams = {
-        mooName: "Crypthesia Pool WETH-USDT",
-        mooSymbol: "CRT WETH-USDT",
+        mooName: "Crypthesia Pool USDC-USDT",
+        mooSymbol: "CRT USDC-USDT",
         delay: 21600,
     };
     
     const strategyParams = {
         want,
-        poolId: 9,
+        poolId: 15,
         chef: jetswap.chef,
         unirouter: jetswap.router,
         strategist: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", // some address
@@ -55,7 +55,7 @@ async function main() {
         crtInteraction: CRTInteractionAddress,
         nativeToCRTRoute: [MATIC, CRT],
         outputToNativeRoute: [pWINGS, MATIC],
-        outputToLp0Route: [pWINGS, ETH ],
+        outputToLp0Route: [pWINGS, USDC],
         outputToLp1Route: [pWINGS, USDT],
         pendingRewardsFunctionName: "pendingCake", // used for rewardsAvailable(), use correct function name from masterchef
     };
