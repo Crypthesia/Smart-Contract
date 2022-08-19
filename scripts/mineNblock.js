@@ -7,7 +7,7 @@ async function mineNBlocks(n) {
 }
 
 async function main(){
-    //await mineNBlocks(4000);
+    await mineNBlocks(10000);
     let deployer, strategy;
     [deployer] = await ethers.getSigners();
     strategy = await ethers.getContractAt("StrategyCommonChefLP", "0x1Ba189CBA10Af7fBf28Fc991D3d5Cdd945C21A94");

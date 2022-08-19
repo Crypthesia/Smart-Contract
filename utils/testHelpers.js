@@ -23,6 +23,7 @@ const zapNativeToToken = async ({ amount, want, nativeTokenAddr, unirouter, swap
   }
 
   if (isLpToken) {
+    console.log(want.address," LP Token");
     try {
       await swapNativeForToken({
         unirouter,
@@ -52,6 +53,7 @@ const zapNativeToToken = async ({ amount, want, nativeTokenAddr, unirouter, swap
       console.log("Could not add LP liquidity.", e);
     }
   } else {
+    console.log(want.address," not LP Token");
     try {
       await swapNativeForToken({ unirouter, token: want, recipient, nativeTokenAddr, amount, swapSignature });
     } catch (e) {

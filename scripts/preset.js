@@ -11,6 +11,8 @@ const config = {
   CRT : "0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12",
   CRTInteractionAddress : "0x8Cd07e40C2801037dcaDA66CCe182F13CC3724c0",
   vault: "0xad8bfcdC4a75aEA6759488C44735E132ffbACa38",
+  lp0: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+  lp1: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
   testAmount: ethers.utils.parseEther("500"),
@@ -28,7 +30,7 @@ async function setBalance(_address, _balance){
 }
 
 async function main(){
-  let vault, strategy, unirouter, want, CRTToken, Native, outputToken, deployer, keeper, other;
+  let vault, strategy, unirouter, want, CRTToken, Native, outputToken, deployer, keeper, other, lp0ct, lp1ct;
 
     [deployer, keeper, other] = await ethers.getSigners();
     console.log("Deployer: ", deployer.address);
@@ -48,9 +50,16 @@ async function main(){
     const unirouterAddr = await strategy.unirouter();
     const unirouterData = getUnirouterData(unirouterAddr);
     unirouter = await ethers.getContractAt(unirouterData.interface, unirouterAddr);
+
     CRTToken = await ethers.getContractAt("Crypthesia", config.CRT);
     want = await getVaultWant(vault, config.wnative);
+    lp0ct = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", config.lp0);
+    lp1ct = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", config.lp1);
+    
     console.log(`Want ${want.address}`);
+    console.log(`lp0 ${lp0ct.address}`);
+    console.log(`lp1 ${lp1ct.address}`);
+    
     await zapNativeToToken({
       amount: config.testAmount,
       want,
@@ -59,6 +68,23 @@ async function main(){
       swapSignature: unirouterData.swapSignature,
       recipient: deployer.address,
     });
+    await zapNativeToToken({
+      amount: config.testAmount,
+      want: lp0ct,
+      nativeTokenAddr: config.wnative,
+      unirouter,
+      swapSignature: unirouterData.swapSignature,
+      recipient: deployer.address,
+    });
+    await zapNativeToToken({
+      amount: config.testAmount,
+      want: lp1ct,
+      nativeTokenAddr: config.wnative,
+      unirouter,
+      swapSignature: unirouterData.swapSignature,
+      recipient: deployer.address,
+    });
+
     const wantBal = await want.balanceOf(deployer.address);
     await want.transfer(other.address, wantBal.div(2));
 }
