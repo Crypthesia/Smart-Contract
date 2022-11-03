@@ -20,9 +20,9 @@ async function mineNBlocks(n) {
 
 
 const config = {
-  CRT : "0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12",
   CRTInteractionAddress : "0x8Cd07e40C2801037dcaDA66CCe182F13CC3724c0",
-  vault: "0x3ebdc890d8Fc00FfD2E22055A8d9114f33124FC4",
+  CRT: "0x19B3288BbAe81deF435800e1cEFCd031d0C147B7",
+  vault: "0xd470bc940E3699e9F5fe942373ebfE51E637282D",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
   testAmount: ethers.utils.parseEther("500"),

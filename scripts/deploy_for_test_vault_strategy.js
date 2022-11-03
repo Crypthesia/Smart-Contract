@@ -24,6 +24,7 @@ const TokenConfig = {
 const contractNames = {
     vault: "BeefyVaultV6",
     strategy: "StrategyCommonChefLP",
+    zap: "BeefyUniV2Zap",
   };
 
 const { jetswap } = addressBook.polygon.platforms;
@@ -35,7 +36,7 @@ async function main() {
     [deployer, kepper, other] = await ethers.getSigners();
     const shouldVerifyOnEtherscan = false;
     
-    const CRT = "0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12";
+    const CRT = "0x49f2e87401B909070eef6E647841C4211daE14Ee";
     const CRTInteractionAddress = "0x85370440AA09Fe3b175edcf09d35EBD8509424F5";
     
     const vaultParams = {
@@ -59,6 +60,12 @@ async function main() {
         outputToLp1Route: [pWINGS, USDT],
         pendingRewardsFunctionName: "pendingCake", // used for rewardsAvailable(), use correct function name from masterchef
     };
+
+    const zapParams = {
+        router : jetswap.router,
+        weth : MATIC,
+    };
+
     if (
         Object.values(vaultParams).some(v => v === undefined) ||
         Object.values(strategyParams).some(v => v === undefined) ||
@@ -69,6 +76,8 @@ async function main() {
     }
     const Vault = await ethers.getContractFactory(contractNames.vault);
     const Strategy = await ethers.getContractFactory(contractNames.strategy);
+    const Zap = await ethers.getContractFactory(contractNames.zap);
+
     // let deployer = new ethers.Wallet("df57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e", 
     // new ethers.providers.JsonRpcProvider(
     //   "http://localhost:8545/"
@@ -77,7 +86,6 @@ async function main() {
     console.log("Deploying:", vaultParams.mooName);
     console.log("Deployer: ", deployer.address);
     const predictedAddresses = await predictAddresses({ creator: deployer.address });
-    console.log("PredictedAddress: ", predictedAddresses);
     const vaultConstructorArguments = [
         predictedAddresses.strategy,
         vaultParams.mooName,

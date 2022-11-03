@@ -8,18 +8,18 @@ const AccountConfig = {
     balance: "0x1000000000000000000", //in hex
 }
 const config = {
-  CRT : "0xD13D238F3BA66C7d824E4f494cEb8844bC4aCd12",
+  CRT : "0x49f2e87401B909070eef6E647841C4211daE14Ee",
   CRTInteractionAddress : "0x8Cd07e40C2801037dcaDA66CCe182F13CC3724c0",
-  vault: "0xad8bfcdC4a75aEA6759488C44735E132ffbACa38",
-  lp0: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+  vault: "0x93c9f29CF2496e73f3d8b07055e2359267207147",
+  lp0: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174", 
   lp1: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
   vaultContract: "BeefyVaultV6",
   strategyContract: "StrategyCommonChefLP",
   testAmount: ethers.utils.parseEther("500"),
   wnative: chainData.tokens.WNATIVE.address,
   keeper: "0x47e3D80f9AB3953b80a7882296D8aC2fd9147849",
-  strategyOwner: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
-  vaultOwner: '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199',
+  strategyOwner: "0x9fFBd2a347E44f0B4AC100F19a84d64cD4E60Bd3",
+  vaultOwner: '0x9fFBd2a347E44f0B4AC100F19a84d64cD4E60Bd3',
 };
 
 async function setBalance(_address, _balance){

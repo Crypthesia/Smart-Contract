@@ -62,7 +62,7 @@ const config: DeploymentConfig = {
       chainId: 31337,
       url: "http://127.0.0.1:8545",
       timeout: 300000,
-      accounts: ["df57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e", "14ebe496061335e1d56f61d4dd00a4dc547fe3dfb6fdd18b304616167fa6ee8c", "307f4e0bd8919fb98098ea4bece5062510e125102ca6b3ef2cda70846d00c77c"],
+      accounts: ["8c6a1eca4883dd5faa554ceaea8b5f61aa13d4e348066573302a922047c67b9c", "14ebe496061335e1d56f61d4dd00a4dc547fe3dfb6fdd18b304616167fa6ee8c", "307f4e0bd8919fb98098ea4bece5062510e125102ca6b3ef2cda70846d00c77c"],
     },
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
@@ -82,6 +82,15 @@ const config: DeploymentConfig = {
   },
   solidity: {
     compilers: [
+      {
+        version: "0.7.0",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.4",
         settings: {
